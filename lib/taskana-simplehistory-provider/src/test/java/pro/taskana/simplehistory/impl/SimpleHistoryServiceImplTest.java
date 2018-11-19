@@ -8,6 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.ibatis.session.SqlSessionManager;
 import org.junit.Before;
@@ -23,6 +25,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import pro.taskana.configuration.TaskanaEngineConfiguration;
 import pro.taskana.simplehistory.impl.mappings.HistoryEventMapper;
+import pro.taskana.simplehistory.impl.mappings.HistoryQueryMapper;
 
 /**
  * Unit Test for SimpleHistoryServiceImplTest.
@@ -41,6 +44,9 @@ public class SimpleHistoryServiceImplTest {
     private HistoryEventMapper historyEventMapperMock;
 
     @Mock
+    private HistoryQueryMapper historyQueryMapperMock;
+
+    @Mock
     private TaskanaHistoryEngineImpl taskanaHistoryEngineMock;
 
     @Mock
@@ -48,6 +54,9 @@ public class SimpleHistoryServiceImplTest {
 
     @Mock
     private SqlSessionManager sqlSessionManagerMock;
+
+    @Mock
+    private HistoryQueryImpl historyQueryMock;
 
     @Before
     public void setup() {
@@ -57,14 +66,15 @@ public class SimpleHistoryServiceImplTest {
     @Test
     public void testInitializeSimpleHistoryService() throws SQLException {
 
-        doReturn(historyEventMapperMock).when(sqlSessionManagerMock).getMapper(any());
+        doReturn(historyEventMapperMock).when(sqlSessionManagerMock).getMapper(HistoryEventMapper.class);
+        doReturn(historyQueryMapperMock).when(sqlSessionManagerMock).getMapper(HistoryQueryMapper.class);
         doReturn(sqlSessionManagerMock).when(taskanaHistoryEngineMock).getSqlSession();
         PowerMockito.mockStatic(TaskanaHistoryEngineImpl.class);
         Mockito.when(TaskanaHistoryEngineImpl.createTaskanaEngine(taskanaEngineConfiguration)).thenReturn(taskanaHistoryEngineMock);
         cutSpy.initialize(taskanaEngineConfiguration);
 
-        verify(sqlSessionManagerMock, times(1)).getMapper(any());
-        verify(taskanaHistoryEngineMock, times(1)).getSqlSession();
+        verify(sqlSessionManagerMock, times(2)).getMapper(any());
+        verify(taskanaHistoryEngineMock, times(2)).getSqlSession();
         PowerMockito.verifyStatic();
     }
 
